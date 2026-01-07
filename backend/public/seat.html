@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Select Seat</title>
+<style>
+body{
+  font-family:Arial, sans-serif;
+  background:linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  min-height:100vh;
+  padding:20px;
+  margin:0;
+}
+.nav{
+  max-width:1000px;
+  margin:0 auto 30px;
+  background:rgba(255,255,255,0.95);
+  padding:15px 30px;
+  border-radius:10px;
+  text-align:center;
+}
+.nav h2{margin:0;color:#667eea}
+.container{
+  max-width:800px;
+  margin:auto;
+  background:#fff;
+  padding:40px;
+  border-radius:15px;
+  box-shadow:0 10px 30px rgba(0,0,0,0.2);
+}
+.seat-map{
+  margin:30px 0;
+}
+.legend{
+  display:flex;
+  justify-content:center;
+  gap:30px;
+  margin-bottom:20px;
+  padding:15px;
+  background:#f8f9fa;
+  border-radius:8px;
+}
+.legend-item{
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+.seat-grid{
+  display:grid;
+  grid-template-columns:repeat(6, 1fr);
+  gap:10px;
+  max-width:500px;
+  margin:30px auto;
+}
+.seat{
+  padding:15px;
+  background:#28a745;
+  color:#fff;
+  border-radius:8px;
+  cursor:pointer;
+  text-align:center;
+  font-weight:bold;
+  transition:all 0.3s;
+  border:2px solid transparent;
+}
+.seat:hover{
+  background:#218838;
+  transform:scale(1.05);
+}
+.seat.selected{
+  background:#667eea;
+  border-color:#764ba2;
+}
+.seat.occupied{
+  background:#dc3545;
+  cursor:not-allowed;
+  opacity:0.6;
+}
+.continue-btn{
+  width:100%;
+  padding:15px;
+  background:linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color:#fff;
+  border:none;
+  border-radius:8px;
+  font-size:18px;
+  font-weight:bold;
+  cursor:pointer;
+  margin-top:20px;
+}
+.continue-btn:disabled{
+  background:#ccc;
+  cursor:not-allowed;
+}
+.flight-info{
+  text-align:center;
+  padding:20px;
+  background:#f8f9fa;
+  border-radius:8px;
+  margin-bottom:20px;
+}
+</style>
+</head>
+<body>
+
+<script>
+if(!localStorage.userEmail || !localStorage.flight) location.href="index.html";
+</script>
+
+<div class="nav">
+  <h2>Select Your Seat</h2>
+</div>
+
+<div class="container">
+  <div class="flight-info">
+    <h3 id="flightName"></h3>
+    <p id="route"></p>
+  </div>
+  
+  <div class="seat-map">
+    <div class="legend">
+      <div class="legend-item">
+        <div style="width:20px;height:20px;background:#28a745;border-radius:4px"></div>
+        <span>Available</span>
+      </div>
+      <div class="legend-item">
+        <div style="width:20px;height:20px;background:#dc3545;border-radius:4px"></div>
+        <span>Occupied</span>
+      </div>
+      <div class="legend-item">
+        <div style="width:20px;height:20px;background:#667eea;border-radius:4px"></div>
+        <span>Selected</span>
+      </div>
+    </div>
+    
+    <div class="seat-grid" id="seatGrid"></div>
+    
+    <button class="continue-btn" id="continueBtn" onclick="continueToPassenger()" disabled>Continue to Passenger Details</button>
+  </div>
+</div>
+
+<script>
+let selectedSeat = null;
+const occupiedSeats = ['3', '7', '12', '18', '25']; // Simulated occupied seats
+
+// Display flight info
+document.getElementById('flightName').textContent = localStorage.flight || 'Flight';
+document.getElementById('route').textContent = `${localStorage.source || ''} → ${localStorage.destination || ''}`;
+
+function generateSeats(){
+  const grid = document.getElementById('seatGrid');
+  for(let i = 1; i <= 30; i++){
+    const seat = document.createElement('div');
+    seat.className = 'seat';
+    if(occupiedSeats.includes(i.toString())){
+      seat.classList.add('occupied');
+    }
+    seat.textContent = i;
+    seat.onclick = () => selectSeat(i, seat);
+    grid.appendChild(seat);
+  }
+}
+
+function selectSeat(seatNum, element){
+  if(element.classList.contains('occupied')) return;
+  
+  // Remove previous selection
+  if(selectedSeat){
+    document.querySelectorAll('.seat').forEach(s => {
+      if(!s.classList.contains('occupied')){
+        s.classList.remove('selected');
+      }
+    });
+  }
+  
+  selectedSeat = seatNum;
+  element.classList.add('selected');
+  document.getElementById('continueBtn').disabled = false;
+  localStorage.setItem('seatNumber', seatNum);
+}
+
+function continueToPassenger(){
+  if(!selectedSeat){
+    alert('Please select a seat');
+    return;
+  }
+  location.href = 'passenger.html';
+}
+
+generateSeats();
+</script>
+
+</body>
+</html>

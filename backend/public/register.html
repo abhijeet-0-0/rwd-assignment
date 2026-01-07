@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Register | Flight Booking</title>
+<style>
+body{
+  font-family: Arial, sans-serif;
+  background: linear-gradient(120deg,#28a745,#8fd19e);
+  height:100vh;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+}
+.card{
+  background:#fff;
+  width:350px;
+  padding:30px;
+  border-radius:10px;
+  box-shadow:0 10px 25px rgba(0,0,0,.2);
+}
+h2{text-align:center}
+input,button{
+  width:100%;
+  padding:10px;
+  margin-top:10px;
+}
+button{
+  background:#28a745;
+  color:#fff;
+  border:none;
+  cursor:pointer;
+}
+button:hover{background:#218838}
+a{
+  display:block;
+  text-align:center;
+  margin-top:15px;
+}
+#msg{text-align:center;margin-top:10px}
+</style>
+</head>
+<body>
+
+<div class="card">
+<h2>Register</h2>
+
+<input id="name" placeholder="Full Name">
+<input id="email" placeholder="Email">
+<input id="password" type="password" placeholder="Password">
+
+<button onclick="register()">Register</button>
+<p id="msg"></p>
+
+<a href="login.html">Already have an account? Login</a>
+</div>
+
+<script>
+function register(){
+  const nameInput = document.getElementById('name');
+  const emailInput = document.getElementById('email');
+  const passwordInput = document.getElementById('password');
+  const msgElement = document.getElementById('msg');
+  
+  const name = nameInput.value.trim();
+  const email = emailInput.value.trim();
+  const password = passwordInput.value;
+  
+  // Client-side validation
+  if(!name || !email || !password){
+    msgElement.innerText = 'All fields are required';
+    msgElement.style.color = 'red';
+    return;
+  }
+  
+  // Email validation
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if(!emailRegex.test(email)){
+    msgElement.innerText = 'Please enter a valid email address';
+    msgElement.style.color = 'red';
+    return;
+  }
+  
+  // Password validation
+  if(password.length < 6){
+    msgElement.innerText = 'Password must be at least 6 characters';
+    msgElement.style.color = 'red';
+    return;
+  }
+  
+  fetch("/register",{
+    method:"POST",
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({
+      name: name,
+      email: email,
+      password: password
+    })
+  }).then(r=>r.json()).then(d=>{
+    msgElement.innerText = d.message;
+    msgElement.style.color = d.success ? "green" : "red";
+    if(d.success){
+      setTimeout(()=>location.href="login.html",1000);
+    }
+  }).catch(err => {
+    msgElement.innerText = 'Registration failed. Please try again.';
+    msgElement.style.color = 'red';
+  });
+}
+</script>
+
+</body>
+</html>

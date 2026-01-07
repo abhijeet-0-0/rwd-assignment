@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Passenger Details</title>
+<style>
+body{
+  font-family:Arial, sans-serif;
+  background:linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  min-height:100vh;
+  padding:20px;
+  margin:0;
+}
+.nav{
+  max-width:600px;
+  margin:0 auto 30px;
+  background:rgba(255,255,255,0.95);
+  padding:15px 30px;
+  border-radius:10px;
+  text-align:center;
+}
+.nav h2{margin:0;color:#667eea}
+.card{
+  max-width:500px;
+  margin:auto;
+  background:#fff;
+  padding:40px;
+  border-radius:15px;
+  box-shadow:0 10px 30px rgba(0,0,0,0.2);
+}
+h3{text-align:center;color:#333;margin-bottom:30px}
+.input-group{
+  margin-bottom:20px;
+}
+label{
+  display:block;
+  margin-bottom:8px;
+  color:#555;
+  font-weight:bold;
+}
+input{
+  width:100%;
+  padding:12px;
+  border:2px solid #ddd;
+  border-radius:8px;
+  font-size:16px;
+  box-sizing:border-box;
+}
+input:focus{
+  outline:none;
+  border-color:#667eea;
+}
+button{
+  width:100%;
+  padding:15px;
+  background:linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color:#fff;
+  border:none;
+  border-radius:8px;
+  font-size:18px;
+  font-weight:bold;
+  cursor:pointer;
+  margin-top:10px;
+}
+button:hover{
+  transform:translateY(-2px);
+  box-shadow:0 5px 15px rgba(102,126,234,0.4);
+}
+#msg{
+  text-align:center;
+  margin-top:15px;
+  color:red;
+}
+</style>
+</head>
+<body>
+
+<script>
+if(!localStorage.userEmail || !localStorage.flight) location.href="index.html";
+</script>
+
+<div class="nav">
+  <h2>Passenger Details</h2>
+</div>
+
+<div class="card">
+  <h3>Enter Passenger Information</h3>
+  <div class="input-group">
+    <label>Full Name</label>
+    <input id="passengerName" placeholder="Enter passenger full name" required>
+  </div>
+  <div class="input-group">
+    <label>Age</label>
+    <input id="passengerAge" type="number" placeholder="Enter age" min="1" max="120" required>
+  </div>
+  <button onclick="continueToConfirmation()">Continue to Confirmation</button>
+  <p id="msg"></p>
+</div>
+
+<script>
+function continueToConfirmation(){
+  const name = document.getElementById('passengerName').value.trim();
+  const age = document.getElementById('passengerAge').value;
+  
+  if(!name){
+    document.getElementById('msg').textContent = 'Please enter passenger name';
+    return;
+  }
+  if(!age || age < 1 || age > 120){
+    document.getElementById('msg').textContent = 'Please enter a valid age';
+    return;
+  }
+  
+  localStorage.setItem('passengerName', name);
+  localStorage.setItem('passengerAge', age);
+  location.href = 'confirmation.html';
+}
+</script>
+
+</body>
+</html>

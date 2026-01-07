@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Search Flights</title>
+<style>
+body{
+  font-family:Arial, sans-serif;
+  background:linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  min-height:100vh;
+  padding:20px;
+  margin:0;
+}
+.nav{
+  max-width:1200px;
+  margin:0 auto 30px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  background:rgba(255,255,255,0.95);
+  padding:15px 30px;
+  border-radius:10px;
+  box-shadow:0 4px 6px rgba(0,0,0,0.1);
+}
+.nav h1{margin:0;color:#667eea}
+.nav-buttons{display:flex;gap:10px}
+.nav-buttons button{
+  padding:10px 20px;
+  border:none;
+  border-radius:5px;
+  cursor:pointer;
+  font-weight:bold;
+}
+.btn-primary{background:#667eea;color:#fff}
+.btn-secondary{background:#6c757d;color:#fff}
+.card{
+  max-width:600px;
+  margin:auto;
+  background:#fff;
+  padding:40px;
+  border-radius:15px;
+  box-shadow:0 10px 30px rgba(0,0,0,0.2);
+}
+h2{text-align:center;color:#333;margin-bottom:30px}
+.input-group{
+  margin-bottom:20px;
+}
+label{
+  display:block;
+  margin-bottom:8px;
+  color:#555;
+  font-weight:bold;
+}
+input{
+  width:100%;
+  padding:12px;
+  border:2px solid #ddd;
+  border-radius:8px;
+  font-size:16px;
+  box-sizing:border-box;
+}
+input:focus{
+  outline:none;
+  border-color:#667eea;
+}
+button.search-btn{
+  width:100%;
+  padding:15px;
+  background:linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color:#fff;
+  border:none;
+  border-radius:8px;
+  font-size:18px;
+  font-weight:bold;
+  cursor:pointer;
+  margin-top:10px;
+}
+button.search-btn:hover{
+  transform:translateY(-2px);
+  box-shadow:0 5px 15px rgba(102,126,234,0.4);
+}
+</style>
+</head>
+<body>
+
+<script>
+if(!localStorage.userEmail) location.href="login.html";
+
+// Set minimum date to today
+document.addEventListener('DOMContentLoaded', function() {
+  const today = new Date().toISOString().split('T')[0];
+  document.getElementById('travelDate').min = today;
+  // Set default to today
+  document.getElementById('travelDate').value = today;
+});
+</script>
+
+<div class="nav">
+  <h1>✈️ Flight Booking</h1>
+  <div class="nav-buttons">
+    <button class="btn-secondary" onclick="location.href='mybookings.html'">My Bookings</button>
+    <button class="btn-primary" onclick="logout()">Logout</button>
+  </div>
+</div>
+
+<div class="card">
+  <h2>Search Flights</h2>
+  <div class="input-group">
+    <label>From</label>
+    <input id="from" placeholder="Enter source city (e.g., Bangalore)">
+  </div>
+  <div class="input-group">
+    <label>To</label>
+    <input id="to" placeholder="Enter destination city (e.g., Mumbai)">
+  </div>
+  <div class="input-group">
+    <label>Travel Date</label>
+    <input id="travelDate" type="date" min="" required>
+  </div>
+  <button class="search-btn" onclick="search()">Search Flights</button>
+</div>
+
+<script>
+function search(){
+  const from = document.getElementById('from').value.trim();
+  const to = document.getElementById('to').value.trim();
+  const travelDate = document.getElementById('travelDate').value;
+  
+  if(!from || !to){
+    alert('Please enter both source and destination');
+    return;
+  }
+  if(!travelDate){
+    alert('Please select a travel date');
+    return;
+  }
+  
+  // Store travel date in localStorage
+  localStorage.setItem('travelDate', travelDate);
+  
+  location.href=`flights.html?source=${encodeURIComponent(from)}&destination=${encodeURIComponent(to)}`;
+}
+function logout(){
+  localStorage.clear();
+  location.href="login.html";
+}
+</script>
+
+</body>
+</html>

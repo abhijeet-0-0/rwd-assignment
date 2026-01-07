@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>My Bookings</title>
+<style>
+body{
+  font-family:Arial, sans-serif;
+  background:linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  min-height:100vh;
+  padding:20px;
+  margin:0;
+}
+.nav{
+  max-width:1000px;
+  margin:0 auto 30px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  background:rgba(255,255,255,0.95);
+  padding:15px 30px;
+  border-radius:10px;
+}
+.nav h2{margin:0;color:#667eea}
+.nav button{
+  padding:10px 20px;
+  background:#667eea;
+  color:#fff;
+  border:none;
+  border-radius:5px;
+  cursor:pointer;
+  margin-left:10px;
+}
+.container{
+  max-width:1000px;
+  margin:auto;
+}
+.booking-card{
+  background:#fff;
+  padding:25px;
+  margin-bottom:20px;
+  border-radius:15px;
+  box-shadow:0 5px 15px rgba(0,0,0,0.1);
+}
+.booking-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:15px;
+  padding-bottom:15px;
+  border-bottom:2px solid #f0f0f0;
+}
+.booking-header h3{
+  margin:0;
+  color:#667eea;
+}
+.booking-id{
+  color:#999;
+  font-size:14px;
+}
+.booking-details{
+  display:grid;
+  grid-template-columns:repeat(auto-fit, minmax(200px, 1fr));
+  gap:15px;
+  margin-bottom:15px;
+}
+.detail-item{
+  padding:10px;
+  background:#f8f9fa;
+  border-radius:8px;
+}
+.detail-label{
+  font-size:12px;
+  color:#666;
+  text-transform:uppercase;
+  margin-bottom:5px;
+}
+.detail-value{
+  font-size:16px;
+  font-weight:bold;
+  color:#333;
+}
+.price-badge{
+  background:linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color:#fff;
+  padding:15px;
+  border-radius:8px;
+  text-align:center;
+  font-size:24px;
+  font-weight:bold;
+}
+.no-bookings{
+  background:#fff;
+  padding:60px;
+  text-align:center;
+  border-radius:15px;
+  color:#666;
+}
+.no-bookings h3{
+  color:#999;
+  margin-bottom:20px;
+}
+.search-btn{
+  padding:12px 30px;
+  background:linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color:#fff;
+  border:none;
+  border-radius:8px;
+  font-size:16px;
+  font-weight:bold;
+  cursor:pointer;
+  margin-top:20px;
+}
+</style>
+</head>
+<body>
+
+<script>
+if(!localStorage.userEmail) location.href="login.html";
+</script>
+
+<div class="nav">
+  <h2>My Bookings</h2>
+  <div>
+    <button onclick="location.href='index.html'">Search Flights</button>
+    <button onclick="logout()">Logout</button>
+  </div>
+</div>
+
+<div class="container" id="bookings-container">
+  <div style="text-align:center;color:#fff;padding:20px">Loading bookings...</div>
+</div>
+
+<script>
+function logout(){
+  localStorage.clear();
+  location.href="login.html";
+}
+
+fetch(`/my-bookings?email=${encodeURIComponent(localStorage.userEmail)}`)
+.then(r => r.json())
+.then(bookings => {
+  const container = document.getElementById('bookings-container');
+  
+  if(bookings.length === 0){
+    container.innerHTML = `
+      <div class="no-bookings">
+        <h3>No bookings yet</h3>
+        <p>Start booking your flights now!</p>
+        <button class="search-btn" onclick="location.href='index.html'">Search Flights</button>
+      </div>
+    `;
+    return;
+  }
+  
+  container.innerHTML = bookings.map(b => {
+    // Handle date formatting properly - booking_date should always be present now
+    let bookingDate = 'N/A';
+    const dateValue = b.booking_date || b.created_at;
+    
+    if(dateValue) {
+      try {
+        // Handle MySQL DATE format (YYYY-MM-DD) or ISO string
+        let date;
+        if(typeof dateValue === 'string' && dateValue.includes('T')) {
+          // ISO string with time
+          date = new Date(dateValue);
+        } else if(typeof dateValue === 'string' && dateValue.includes('-')) {
+          // MySQL DATE format (YYYY-MM-DD)
+          const [year, month, day] = dateValue.split('-');
+          date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+        } else {
+          date = new Date(dateValue);
+        }
+        
+        if(!isNaN(date.getTime())) {
+          bookingDate = date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+        }
+      } catch(e) {
+        // If all parsing fails, show the raw value or N/A
+        bookingDate = dateValue ? dateValue.toString() : 'N/A';
+      }
+    }
+    
+    return `
+      <div class="booking-card">
+        <div class="booking-header">
+          <div>
+            <h3>${b.flight_name || 'Flight'}</h3>
+            <div class="booking-id">Booking ID: #${b.booking_id}</div>
+          </div>
+          <div class="price-badge">₹${b.price || 0}</div>
+        </div>
+        <div class="booking-details">
+          <div class="detail-item">
+            <div class="detail-label">Route</div>
+            <div class="detail-value">${b.source || ''} → ${b.destination || ''}</div>
+          </div>
+          <div class="detail-item">
+            <div class="detail-label">Passenger</div>
+            <div class="detail-value">${b.passenger_name && b.passenger_name.trim() ? b.passenger_name : 'N/A'}</div>
+          </div>
+          <div class="detail-item">
+            <div class="detail-label">Age</div>
+            <div class="detail-value">${b.passenger_age ? b.passenger_age : 'N/A'}</div>
+          </div>
+          <div class="detail-item">
+            <div class="detail-label">Seat</div>
+            <div class="detail-value">${b.seat_number && b.seat_number.trim() ? b.seat_number : 'N/A'}</div>
+          </div>
+          <div class="detail-item">
+            <div class="detail-label">Travel Date</div>
+            <div class="detail-value">${bookingDate}</div>
+          </div>
+          <div class="detail-item">
+            <div class="detail-label">Passengers</div>
+            <div class="detail-value">${b.passengers || 1}</div>
+          </div>
+        </div>
+      </div>
+    `;
+  }).join("");
+})
+.catch(err => {
+  document.getElementById('bookings-container').innerHTML = `
+    <div class="no-bookings">
+      <h3>Error loading bookings</h3>
+      <p>Please try again later</p>
+    </div>
+  `;
+});
+</script>
+
+</body>
+</html>

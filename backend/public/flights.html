@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Available Flights</title>
+<style>
+body{
+  font-family:Arial, sans-serif;
+  background:linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  min-height:100vh;
+  padding:20px;
+  margin:0;
+}
+.nav{
+  max-width:1200px;
+  margin:0 auto 30px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  background:rgba(255,255,255,0.95);
+  padding:15px 30px;
+  border-radius:10px;
+}
+.nav h2{margin:0;color:#667eea}
+.nav button{
+  padding:10px 20px;
+  background:#667eea;
+  color:#fff;
+  border:none;
+  border-radius:5px;
+  cursor:pointer;
+}
+.container{
+  max-width:1000px;
+  margin:auto;
+}
+.flight-card{
+  background:#fff;
+  padding:25px;
+  margin-bottom:20px;
+  border-radius:15px;
+  box-shadow:0 5px 15px rgba(0,0,0,0.1);
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+.flight-info h3{margin:0 0 10px 0;color:#333}
+.flight-info p{margin:5px 0;color:#666}
+.flight-price{
+  text-align:right;
+}
+.flight-price .price{
+  font-size:28px;
+  font-weight:bold;
+  color:#667eea;
+  margin-bottom:10px;
+}
+.book-btn{
+  padding:12px 30px;
+  background:linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color:#fff;
+  border:none;
+  border-radius:8px;
+  font-size:16px;
+  font-weight:bold;
+  cursor:pointer;
+}
+.book-btn:hover{
+  transform:translateY(-2px);
+  box-shadow:0 5px 15px rgba(102,126,234,0.4);
+}
+.no-flights{
+  background:#fff;
+  padding:40px;
+  text-align:center;
+  border-radius:15px;
+  color:#666;
+}
+</style>
+</head>
+<body>
+
+<script>
+if(!localStorage.userEmail) location.href="login.html";
+</script>
+
+<div class="nav">
+  <h2>Available Flights</h2>
+  <button onclick="location.href='index.html'">← Back to Search</button>
+</div>
+
+<div class="container" id="flights-container">
+  <div style="text-align:center;color:#fff;padding:20px">Loading flights...</div>
+</div>
+
+<script>
+const params = new URLSearchParams(location.search);
+const source = params.get("source");
+const destination = params.get("destination");
+
+fetch(`/api/flights?source=${encodeURIComponent(source)}&destination=${encodeURIComponent(destination)}`)
+.then(r => r.json())
+.then(flights => {
+  const container = document.getElementById('flights-container');
+  if(flights.length === 0){
+    container.innerHTML = `
+      <div class="no-flights">
+        <h3>No flights found</h3>
+        <p>No flights available for ${source} to ${destination}</p>
+        <button class="book-btn" onclick="location.href='index.html'" style="margin-top:20px">Search Again</button>
+      </div>
+    `;
+    return;
+  }
+  
+  container.innerHTML = flights.map(f => `
+    <div class="flight-card">
+      <div class="flight-info">
+        <h3>${f.flight_name}</h3>
+        <p><strong>Route:</strong> ${f.source} → ${f.destination}</p>
+        <p><strong>Departure:</strong> ${f.departure} | <strong>Arrival:</strong> ${f.arrival}</p>
+      </div>
+      <div class="flight-price">
+        <div class="price">₹${f.price}</div>
+        <button class="book-btn" onclick="book('${f.flight_name}', ${f.price}, '${f.source}', '${f.destination}')">Book Now</button>
+      </div>
+    </div>
+  `).join("");
+});
+
+function book(flightName, price, source, destination){
+  localStorage.setItem("flight", flightName);
+  localStorage.setItem("price", price);
+  localStorage.setItem("source", source);
+  localStorage.setItem("destination", destination);
+  location.href = "seat.html";
+}
+</script>
+
+</body>
+</html>
