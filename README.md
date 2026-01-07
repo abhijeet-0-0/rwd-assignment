@@ -28,13 +28,12 @@
 - Node.js
 - Express.js
 - MySQL
-- MySQL2 Package
-- CORS
 
 ### Tool
 - VS Code
 - MySQL Workbench
 - Git & GitHub
 - Browser (Chrome)
+
 
 
